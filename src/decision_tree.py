@@ -44,5 +44,27 @@ def _split_info(sizes, n):
     p = p[p > 0]
     return float(-(p * np.log2(p)).sum())
 
+class DecisionTree:
 
+    def __init__(self, task, feature_types, feature_names=None, categories=None,
+                 class_names=None):
+        if task not in ("classification", "regression"):
+            raise ValueError("task must be 'classification' or 'regression'")
+        self.task = task
+        self.feature_types = list(feature_types)
+        self.feature_names = feature_names or [f"x{j}" for j in range(len(feature_types))]
+        self.categories = categories or {}
+        self.class_names = class_names
+        self.root = None
+        self.n_classes = None
+
+    def fit(self, X, y):
+        X = np.asarray(X, dtype=float)
+        y = np.asarray(y)
+        if self.task == "classification":
+            y = y.astype(int)
+            self.n_classes = int(y.max()) + 1 if self.n_classes is None else self.n_classes
+        else:
+            y = y.astype(float)
+        self.root = self._grow(X, y, used_cat=frozenset())
 
