@@ -1,0 +1,31 @@
+from __future__ import annotations
+
+import os
+from dataclasses import dataclass, field
+
+import numpy as np
+import pandas as pd
+
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
+
+
+@dataclass
+class Dataset:
+    name: str
+    task: str                      
+    X: np.ndarray                  
+    y: np.ndarray                  
+    feature_names: list
+    feature_types: list            
+    categories: dict = field(default_factory=dict)
+    class_names: list | None = None
+    target_note: str = ""
+
+
+def _path(*names):
+    """Return the first file in DATA_DIR that exists among ``names``."""
+    for n in names:
+        p = os.path.join(DATA_DIR, n)
+        if os.path.exists(p):
+            return p
+    raise FileNotFoundError(f"None of {names} found in {DATA_DIR}")
