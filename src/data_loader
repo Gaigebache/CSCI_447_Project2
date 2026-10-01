@@ -29,3 +29,27 @@ def _path(*names):
         if os.path.exists(p):
             return p
     raise FileNotFoundError(f"None of {names} found in {DATA_DIR}")
+
+def _encode(df: pd.DataFrame, feature_types: list, orders: dict | None = None):
+    """Turn a DataFrame into a float matrix, coding categorical columns."""
+    orders = orders or {}
+    X = np.empty(df.shape, dtype=float)
+    categories = {}
+    for j, col in enumerate(df.columns):
+        if feature_types[j] == "cat":
+            vals = df[col].astype(str)
+            labels = orders.get(col) or sorted(vals.unique())
+            lookup = {v: i for i, v in enumerate(labels)}
+            X[:, j] = vals.map(lookup).astype(float).values
+            categories[j] = labels
+        else:
+            X[:, j] = pd.to_numeric(df[col]).astype(float).values
+    return X, categories
+
+
+def _encode_target(y_raw):
+    labels = sorted(pd.Series(y_raw).astype(str).unique())
+    lookup = {v: i for i, v in enumerate(labels)}
+    return np.array([lookup[str(v)] for v in y_raw], dtype=int), labels
+
+
